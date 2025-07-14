@@ -3,7 +3,6 @@
 #include <Eigen/Core>
 #include <memory>
 #include <vector>
-
 #include "open3d/Open3D.h"
 
 inline void visualize(
