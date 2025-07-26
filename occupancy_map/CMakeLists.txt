@@ -1,0 +1,5 @@
+add_library(occupancy_grid_map_3d_lib STATIC)
+target_sources(occupancy_grid_map_3d_lib PRIVATE occupancy_grid_map_3d.cpp)
+target_compile_features(occupancy_grid_map_3d_lib PRIVATE cxx_std_17)
+target_include_directories(occupancy_grid_map_3d_lib PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+target_link_libraries(occupancy_grid_map_3d_lib PUBLIC Eigen3::Eigen)

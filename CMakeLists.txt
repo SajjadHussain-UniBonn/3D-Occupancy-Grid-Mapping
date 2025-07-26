@@ -6,5 +6,5 @@ find_package(Open3D REQUIRED HINTS ${CMAKE_SOURCE_DIR}/open3d/lib/cmake/Open3D)
 
 add_subdirectory(dataloader)
 add_subdirectory(visualizer)
+add_subdirectory(occupancy_map)
 add_subdirectory(app)
-
