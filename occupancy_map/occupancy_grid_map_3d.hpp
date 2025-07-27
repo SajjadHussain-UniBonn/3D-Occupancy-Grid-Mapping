@@ -3,7 +3,7 @@
 #include <vector>
 #include <Eigen/Dense>
 
-struct voxelHash
+struct VoxelHash
 {
     std::size_t operator()(const Eigen::Vector3i& vec)const
     {
@@ -20,5 +20,5 @@ class OccupancyGridMap3D
     
     private:
         double voxel_size;
-        Eigen::Vector3i pointToVoxel(const Eigen::Vector3d& point) const;
+        Eigen::Vector3i pointToVoxel(const Eigen::Vector3d& point) const; 
 };
