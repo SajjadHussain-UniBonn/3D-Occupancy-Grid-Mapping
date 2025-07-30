@@ -17,9 +17,9 @@ class OccupancyGridMap3D
 {
     public:
         OccupancyGridMap3D(const double voxel_size);
-    
+
     private:
         double voxel_size;
-        std::vector<Eigen::Vector3i> OccupancyGridMap3D::bresenham3D(const Eigen::Vector3i& start, const Eigen::Vector3i& end) const;
+        std::vector<Eigen::Vector3i> bresenham3D(const Eigen::Vector3i& start, const Eigen::Vector3i& end) const;
         Eigen::Vector3i pointToVoxel(const Eigen::Vector3d& point) const; 
 };

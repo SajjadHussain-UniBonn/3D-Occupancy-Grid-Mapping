@@ -2,9 +2,10 @@
 
 
 OccupancyGridMap3D::OccupancyGridMap3D(const double voxel_size) : voxel_size(voxel_size) {}
-Eigen::Vector3i OccupancyGridMap3D::pointToVoxel(const Eigen::Vector3d& point) const{
-    return (point/voxel_size).array().floor().cast<int>();}
-
+Eigen::Vector3i OccupancyGridMap3D::pointToVoxel(const Eigen::Vector3d& point) const
+{
+    return (point/voxel_size).array().floor().cast<int>();
+}
 std::vector<Eigen::Vector3i> OccupancyGridMap3D::bresenham3D(const Eigen::Vector3i& start, const Eigen::Vector3i& end) const
 {
     std::vector<Eigen::Vector3i> voxels;
@@ -21,15 +22,40 @@ std::vector<Eigen::Vector3i> OccupancyGridMap3D::bresenham3D(const Eigen::Vector
         for(int i =0; i<= dx; ++i)
         {
             voxels.emplace_back(x,y,z);
-            if (err_y > 0) { y += s.y();err_y -= dx2;}
+            if (err_y > 0) {y += s.y(); err_y -= dx2;}
             if (err_z > 0) {z += s.z(); err_z -= dx2;}
             err_y += dy2;
             err_z += dz2;
             x += s.x();
         }
     }
-    else if (dy >= dx && dy >> dz)
-    {
-
+    else if (dy >= dx && dy >= dz)
+    { 
+        int err_x = dx2 - dy;
+        int err_z = dz2 - dy;
+        for (int i = 0; i<=dy; ++i)
+        {
+            voxels.emplace_back(x,y,z);
+            if (err_x > 0) {x += s.x(); err_x -= dy2;}
+            if (err_z > 0) {z += s.z(); err_z -= dy2;}
+        }
+        err_x += dx2;
+        err_z += dz2;
+        y += s.y();
     }
+    else
+    {
+        int err_x = dx2 - dz;
+        int err_y = dy2 - dz;
+        for (int i = 0; i<=dz; ++i)
+        {
+            voxels.emplace_back(x,y,z);
+            if (err_x > 0) {x += s.x(); err_x -= dz2;}
+            if (err_y > 0) {y += s.y(); err_y -= dz2;}
+        }
+        err_x += dx2;
+        err_y += dy2;
+        z += s.z();
+    }
+    return voxels;
 }
