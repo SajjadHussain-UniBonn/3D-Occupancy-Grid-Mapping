@@ -2,10 +2,12 @@
 
 
 OccupancyGridMap3D::OccupancyGridMap3D(const double voxel_size) : voxel_size(voxel_size) {}
+
 Eigen::Vector3i OccupancyGridMap3D::pointToVoxel(const Eigen::Vector3d& point) const
 {
     return (point/voxel_size).array().floor().cast<int>();
 }
+
 std::vector<Eigen::Vector3i> OccupancyGridMap3D::bresenham3D(const Eigen::Vector3i& start, const Eigen::Vector3i& end) const
 {
     std::vector<Eigen::Vector3i> voxels;
@@ -58,4 +60,32 @@ std::vector<Eigen::Vector3i> OccupancyGridMap3D::bresenham3D(const Eigen::Vector
         z += s.z();
     }
     return voxels;
+}
+
+void OccupancyGridMap3D::updateVoxelState (const Eigen::Vector3i& voxel, VoxelState state)
+{
+    auto it = grid_map.find(voxel);
+    if (it!= grid_map.end() && state == VoxelState::free && it->second == VoxelState::occupied)
+    {
+        return;
+    }   
+    grid_map[voxel]= state;
+}
+
+void OccupancyGridMap3D::integrateScan(const Eigen::Matrix4d& pose, const std::vector<Eigen::Vector3d>& points)
+{
+    Eigen::Vector3d robot_pos = pose.block<3, 1>(0, 3);
+    for (const auto& p: points)
+    {
+        Eigen::Vector4d ph(p.x(), p.y(), p.z(), 1.0);
+        Eigen::Vector3d map_point = (pose * ph).head<3>();
+        auto start_voxel = pointToVoxel(robot_pos);
+        auto end_voxel = pointToVoxel(map_point);
+        auto ray = bresenham3D(start_voxel,end_voxel);
+        for (size_t i =0 ; i+1 < ray.size(); ++i)
+        {
+            updateVoxelState(ray[i], VoxelState::free);
+        }
+        updateVoxelState(ray.back(),VoxelState::occupied);
+    }
 }

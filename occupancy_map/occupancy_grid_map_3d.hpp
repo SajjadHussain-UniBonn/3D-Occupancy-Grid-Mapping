@@ -3,6 +3,8 @@
 #include <vector>
 #include <Eigen/Dense>
 
+enum class VoxelState {unknown, free, occupied};
+
 struct VoxelHash
 {
     std::size_t operator()(const Eigen::Vector3i& vec)const
@@ -17,9 +19,12 @@ class OccupancyGridMap3D
 {
     public:
         OccupancyGridMap3D(const double voxel_size);
+        void integrateScan(const Eigen::Matrix4d& pose, const std::vector<Eigen::Vector3d>& points);
 
     private:
         double voxel_size;
+        std::unordered_map<Eigen::Vector3i,VoxelState,VoxelHash> grid_map;
         std::vector<Eigen::Vector3i> bresenham3D(const Eigen::Vector3i& start, const Eigen::Vector3i& end) const;
         Eigen::Vector3i pointToVoxel(const Eigen::Vector3d& point) const; 
+        void updateVoxelState (const Eigen::Vector3i& voxel, VoxelState state);
 };
