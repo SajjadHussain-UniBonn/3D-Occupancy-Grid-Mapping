@@ -89,3 +89,7 @@ void OccupancyGridMap3D::integrateScan(const Eigen::Matrix4d& pose, const std::v
         updateVoxelState(ray.back(),VoxelState::occupied);
     }
 }
+Eigen::Vector3d OccupancyGridMap3D::voxelToPoint (const Eigen::Vector3i& voxel) const
+{
+    return voxel.cast<double>() * voxel_size + Eigen::Vector3d::Constant(voxel_size/2.0);
+}

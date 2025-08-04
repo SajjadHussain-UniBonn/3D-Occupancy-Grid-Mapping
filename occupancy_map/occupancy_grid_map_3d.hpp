@@ -27,4 +27,5 @@ class OccupancyGridMap3D
         std::vector<Eigen::Vector3i> bresenham3D(const Eigen::Vector3i& start, const Eigen::Vector3i& end) const;
         Eigen::Vector3i pointToVoxel(const Eigen::Vector3d& point) const; 
         void updateVoxelState (const Eigen::Vector3i& voxel, VoxelState state);
+        Eigen::Vector3d voxelToPoint (const Eigen::Vector3i& voxel) const; 
 };
