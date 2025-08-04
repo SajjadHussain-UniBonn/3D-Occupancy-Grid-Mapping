@@ -20,6 +20,8 @@ class OccupancyGridMap3D
     public:
         OccupancyGridMap3D(const double voxel_size);
         void integrateScan(const Eigen::Matrix4d& pose, const std::vector<Eigen::Vector3d>& points);
+        std::vector<Eigen::Vector3d> extractOccupiedVoxels() const;
+        std::vector<Eigen::Vector3d> extractFreeVoxels() const;
 
     private:
         double voxel_size;

@@ -59,6 +59,7 @@ std::vector<Eigen::Vector3i> OccupancyGridMap3D::bresenham3D(const Eigen::Vector
         err_y += dy2;
         z += s.z();
     }
+    voxels.shrink_to_fit();
     return voxels;
 }
 
@@ -92,4 +93,40 @@ void OccupancyGridMap3D::integrateScan(const Eigen::Matrix4d& pose, const std::v
 Eigen::Vector3d OccupancyGridMap3D::voxelToPoint (const Eigen::Vector3i& voxel) const
 {
     return voxel.cast<double>() * voxel_size + Eigen::Vector3d::Constant(voxel_size/2.0);
+}
+std::vector<Eigen::Vector3d> OccupancyGridMap3D::extractOccupiedVoxels() const 
+{
+    std::vector<Eigen::Vector3d> occupiedVoxels;
+    auto isOccupied = [](VoxelState state) 
+    {
+        return state == VoxelState::occupied;
+    };
+
+    for (const auto& [voxel, state] : grid_map) 
+    {
+        if (isOccupied(state))
+        {
+            occupiedVoxels.emplace_back(voxelToPoint(voxel));
+        }
+    }
+    occupiedVoxels.shrink_to_fit();
+    return occupiedVoxels;
+}
+std::vector<Eigen::Vector3d> OccupancyGridMap3D::extractFreeVoxels() const 
+{
+    std::vector<Eigen::Vector3d> freeVoxels;
+    auto isFree = [](VoxelState state) 
+    {
+        return state == VoxelState::free;
+    };
+
+    for (const auto& [voxel, state] : grid_map) 
+    {
+        if (isFree(state))
+        {
+            freeVoxels.emplace_back(voxelToPoint(voxel));
+        }
+    }
+    freeVoxels.shrink_to_fit();
+    return freeVoxels;
 }
