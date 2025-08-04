@@ -23,7 +23,7 @@ int main()
     std::vector<Eigen::Vector3d> points = pose_and_cloud.second;
 
     map.integrateScan(pose, points);
-
+    std::vector<Eigen::Vector3d> occupied_points = map.extractFreePoints();
     return 0;
 }
 

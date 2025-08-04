@@ -94,9 +94,9 @@ Eigen::Vector3d OccupancyGridMap3D::voxelToPoint (const Eigen::Vector3i& voxel) 
 {
     return voxel.cast<double>() * voxel_size + Eigen::Vector3d::Constant(voxel_size/2.0);
 }
-std::vector<Eigen::Vector3d> OccupancyGridMap3D::extractOccupiedVoxels() const 
+std::vector<Eigen::Vector3d> OccupancyGridMap3D::extractOccupiedPoints() const 
 {
-    std::vector<Eigen::Vector3d> occupiedVoxels;
+    std::vector<Eigen::Vector3d> occupied_points;
     auto isOccupied = [](VoxelState state) 
     {
         return state == VoxelState::occupied;
@@ -106,15 +106,15 @@ std::vector<Eigen::Vector3d> OccupancyGridMap3D::extractOccupiedVoxels() const
     {
         if (isOccupied(state))
         {
-            occupiedVoxels.emplace_back(voxelToPoint(voxel));
+            occupied_points.emplace_back(voxelToPoint(voxel));
         }
     }
-    occupiedVoxels.shrink_to_fit();
-    return occupiedVoxels;
+    occupied_points.shrink_to_fit();
+    return occupied_points;
 }
-std::vector<Eigen::Vector3d> OccupancyGridMap3D::extractFreeVoxels() const 
+std::vector<Eigen::Vector3d> OccupancyGridMap3D::extractFreePoints() const 
 {
-    std::vector<Eigen::Vector3d> freeVoxels;
+    std::vector<Eigen::Vector3d> free_points;
     auto isFree = [](VoxelState state) 
     {
         return state == VoxelState::free;
@@ -124,9 +124,9 @@ std::vector<Eigen::Vector3d> OccupancyGridMap3D::extractFreeVoxels() const
     {
         if (isFree(state))
         {
-            freeVoxels.emplace_back(voxelToPoint(voxel));
+            free_points.emplace_back(voxelToPoint(voxel));
         }
     }
-    freeVoxels.shrink_to_fit();
-    return freeVoxels;
+    free_points.shrink_to_fit();
+    return free_points;
 }
