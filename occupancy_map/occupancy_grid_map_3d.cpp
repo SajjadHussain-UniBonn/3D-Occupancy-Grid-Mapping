@@ -101,7 +101,7 @@ Eigen::Vector3d OccupancyGridMap3D::voxelToPoint (const Eigen::Vector3i& voxel) 
 std::vector<Eigen::Vector3d> OccupancyGridMap3D::extractOccupiedVoxels() const 
 {
     std::vector<Eigen::Vector3d> occupied_voxels;
-    std::for_each(grid_map.begin(),grid_map.end(),[&](const auto& pair){
+    std::for_each(grid_map.cbegin(),grid_map.cend(),[&](const auto& pair){
         if (pair.second == VoxelState::occupied){occupied_voxels.emplace_back(voxelToPoint(pair.first));}});
     occupied_voxels.shrink_to_fit();
     return occupied_voxels;
@@ -109,9 +109,8 @@ std::vector<Eigen::Vector3d> OccupancyGridMap3D::extractOccupiedVoxels() const
 std::vector<Eigen::Vector3d> OccupancyGridMap3D::extractFreeVoxels() const 
 {
     std::vector<Eigen::Vector3d> free_voxels;
-    std::for_each(grid_map.begin(),grid_map.end(),[&](const auto& pair){
-        if (pair.second == VoxelState::free){free_voxels.emplace_back(voxelToPoint(pair.first));
-        }});
+    std::for_each(grid_map.cbegin(),grid_map.cend(),[&](const auto& pair){
+        if (pair.second == VoxelState::free){free_voxels.emplace_back(voxelToPoint(pair.first));}});
     free_voxels.shrink_to_fit();
     return free_voxels;
 }
