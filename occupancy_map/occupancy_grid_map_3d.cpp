@@ -82,6 +82,10 @@ void OccupancyGridMap3D::integrateScan(const Eigen::Matrix4d& pose, const std::v
         Eigen::Vector3d map_point = (pose * ph).head<3>();
         auto start_voxel = pointToVoxel(robot_pos);
         auto end_voxel = pointToVoxel(map_point);
+        if (grid_map.find(start_voxel)!=grid_map.end() && grid_map.find(end_voxel)!= grid_map.end())
+        {
+            continue;
+        }
         auto ray = bresenham3D(start_voxel,end_voxel);
         for (size_t i =0 ; i+1 < ray.size(); ++i)
         {
@@ -94,39 +98,20 @@ Eigen::Vector3d OccupancyGridMap3D::voxelToPoint (const Eigen::Vector3i& voxel) 
 {
     return voxel.cast<double>() * voxel_size + Eigen::Vector3d::Constant(voxel_size/2.0);
 }
-std::vector<Eigen::Vector3d> OccupancyGridMap3D::extractOccupiedPoints() const 
+std::vector<Eigen::Vector3d> OccupancyGridMap3D::extractOccupiedVoxels() const 
 {
-    std::vector<Eigen::Vector3d> occupied_points;
-    auto isOccupied = [](VoxelState state) 
-    {
-        return state == VoxelState::occupied;
-    };
-
-    for (const auto& [voxel, state] : grid_map) 
-    {
-        if (isOccupied(state))
-        {
-            occupied_points.emplace_back(voxelToPoint(voxel));
-        }
-    }
-    occupied_points.shrink_to_fit();
-    return occupied_points;
+    std::vector<Eigen::Vector3d> occupied_voxels;
+    std::for_each(grid_map.begin(),grid_map.end(),[&](const auto& pair){
+        if (pair.second == VoxelState::occupied){occupied_voxels.emplace_back(voxelToPoint(pair.first));}});
+    occupied_voxels.shrink_to_fit();
+    return occupied_voxels;
 }
-std::vector<Eigen::Vector3d> OccupancyGridMap3D::extractFreePoints() const 
+std::vector<Eigen::Vector3d> OccupancyGridMap3D::extractFreeVoxels() const 
 {
-    std::vector<Eigen::Vector3d> free_points;
-    auto isFree = [](VoxelState state) 
-    {
-        return state == VoxelState::free;
-    };
-
-    for (const auto& [voxel, state] : grid_map) 
-    {
-        if (isFree(state))
-        {
-            free_points.emplace_back(voxelToPoint(voxel));
-        }
-    }
-    free_points.shrink_to_fit();
-    return free_points;
+    std::vector<Eigen::Vector3d> free_voxels;
+    std::for_each(grid_map.begin(),grid_map.end(),[&](const auto& pair){
+        if (pair.second == VoxelState::free){free_voxels.emplace_back(voxelToPoint(pair.first));
+        }});
+    free_voxels.shrink_to_fit();
+    return free_voxels;
 }
