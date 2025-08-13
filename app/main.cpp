@@ -9,10 +9,9 @@ int main()
 {
     const std::string data_dir = "/home/sajjad/3D-Occupancy-Grid-Mapping/data";
     const dataloader::Dataset dataset = dataloader::Dataset(data_dir);
-    OccupancyGridMap3D map(0.2);
+    OccupancyGridMap3D map(0.5);
     double total_scan_time = 0;
     auto t0 = std::chrono::high_resolution_clock::now();
-    std::cout<<dataset.size()<<std::endl;
     for (size_t i=0; i<dataset.size(); ++i)
     {
         auto [pose,cloud] = dataset[i];
@@ -27,7 +26,7 @@ int main()
     auto t1 = std::chrono::high_resolution_clock::now();
     std::cout << "\nAverage scan time: " << total_scan_time / dataset.size() << " s\n";
     std::cout << "Total execution time: " << std::chrono::duration<double>(t1 - t0).count() << " s\n";
-    visualizeOccupancyMap(map.extractOccupiedVoxels(), map.extractFreeVoxels());
+    visualize(map.extractOccupiedVoxels());
 
     return 0;
 }
