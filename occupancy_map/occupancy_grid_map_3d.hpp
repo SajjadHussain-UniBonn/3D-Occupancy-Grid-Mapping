@@ -3,7 +3,6 @@
 #include <vector>
 #include <Eigen/Dense>
 
-//enum class VoxelState {unknown, free, occupied};
 
 struct VoxelHash
 {
