@@ -1,4 +1,5 @@
 #include "occupancy_grid_map_3d.hpp"
+#include <cmath>
 
 
 OccupancyGridMap3D::OccupancyGridMap3D(const double voxel_size) : voxel_size(voxel_size) {}
@@ -63,14 +64,9 @@ std::vector<Eigen::Vector3i> OccupancyGridMap3D::bresenham3D(const Eigen::Vector
     return voxels;
 }
 
-void OccupancyGridMap3D::updateVoxelState (const Eigen::Vector3i& voxel, VoxelState state)
+void OccupancyGridMap3D::updateVoxelState (const Eigen::Vector3i& voxel,const double voxel_curr_log_odd,const double inv_sensor_model_log_odd)
 {
-    auto it = grid_map.find(voxel);
-    if (it!= grid_map.end() && state == VoxelState::free && it->second == VoxelState::occupied)
-    {
-        return;
-    }   
-    grid_map[voxel]= state;
+    grid_map[voxel] = voxel_curr_log_odd + inv_sensor_model_log_odd - l0;
 }
 
 void OccupancyGridMap3D::integrateScan(const Eigen::Matrix4d& pose, const std::vector<Eigen::Vector3d>& points)
@@ -87,11 +83,14 @@ void OccupancyGridMap3D::integrateScan(const Eigen::Matrix4d& pose, const std::v
             continue;
         }
         auto ray = bresenham3D(start_voxel,end_voxel);
-        for (size_t i =0 ; i+1 < ray.size(); ++i)
+        if (!ray.empty())
         {
-            updateVoxelState(ray[i], VoxelState::free);
+            std::for_each(ray.cbegin(), std::prev(ray.cend()), [&](const auto& voxel) {
+                                auto voxel_log_odd = getVoxelLogOdds(voxel);
+                                updateVoxelState(voxel, voxel_log_odd, l_free);});
+            auto last_voxel =  ray.back();                  
+            updateVoxelState(last_voxel,getVoxelLogOdds(last_voxel),l_occ);
         }
-        updateVoxelState(ray.back(),VoxelState::occupied);
     }
 }
 Eigen::Vector3d OccupancyGridMap3D::voxelToPoint (const Eigen::Vector3i& voxel) const
@@ -102,7 +101,7 @@ std::vector<Eigen::Vector3d> OccupancyGridMap3D::extractOccupiedVoxels() const
 {
     std::vector<Eigen::Vector3d> occupied_voxels;
     std::for_each(grid_map.cbegin(),grid_map.cend(),[&](const auto& pair){
-        if (pair.second == VoxelState::occupied){occupied_voxels.emplace_back(voxelToPoint(pair.first));}});
+        if (logOddsToProb(pair.second) >= 0.7){occupied_voxels.emplace_back(voxelToPoint(pair.first));}});
     occupied_voxels.shrink_to_fit();
     return occupied_voxels;
 }
@@ -110,7 +109,24 @@ std::vector<Eigen::Vector3d> OccupancyGridMap3D::extractFreeVoxels() const
 {
     std::vector<Eigen::Vector3d> free_voxels;
     std::for_each(grid_map.cbegin(),grid_map.cend(),[&](const auto& pair){
-        if (pair.second == VoxelState::free){free_voxels.emplace_back(voxelToPoint(pair.first));}});
+        if (logOddsToProb(pair.second) < 0.7){free_voxels.emplace_back(voxelToPoint(pair.first));}});
     free_voxels.shrink_to_fit();
     return free_voxels;
+}
+double OccupancyGridMap3D::getVoxelLogOdds(const Eigen::Vector3i& voxel) const
+{
+    auto it = grid_map.find(voxel);
+    if(it == grid_map.end()){return l0;}
+    return it->second;
+}
+double OccupancyGridMap3D::probToLogOdds (const double p) const
+{
+    // To avoid division by zero
+    if (p <= 0.0) { return -std::numeric_limits<double>::infinity();}
+    if (p >= 1.0) { return std::numeric_limits<double>::infinity();}
+    return std::log(p/(1.0 - p));
+}
+double OccupancyGridMap3D::logOddsToProb (const double l) const
+{
+    return 1.0/(1.0 + std::exp(-l));
 }
