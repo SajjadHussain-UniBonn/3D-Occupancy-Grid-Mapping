@@ -1,7 +1,9 @@
 #pragma once
+
 #include <unordered_map>
 #include <vector>
 #include <Eigen/Dense>
+#include <cmath>
 
 
 struct VoxelHash
@@ -24,9 +26,9 @@ class OccupancyGridMap3D
 
     private:
         double voxel_size;
-        const double l0 = 0.0; // prob = 0.5
-        const double l_occ = 0.8473; //prob = 0.7
-        const double l_free = - 0.8473; //prob = 0.3
+        const double l0 = std::log(0.5/(1.0 - 0.5));
+        const double l_occ = std::log(0.7/(1.0 - 0.7));
+        const double l_free = std::log(0.3/(1.0 - 0.3)); 
 
         std::unordered_map<Eigen::Vector3i,double ,VoxelHash> grid_map;
         std::vector<Eigen::Vector3i> bresenham3D(const Eigen::Vector3i& start, const Eigen::Vector3i& end) const;

@@ -1,5 +1,5 @@
 #include "occupancy_grid_map_3d.hpp"
-#include <cmath>
+
 
 
 OccupancyGridMap3D::OccupancyGridMap3D(const double voxel_size) : voxel_size(voxel_size) {}
@@ -109,7 +109,7 @@ std::vector<Eigen::Vector3d> OccupancyGridMap3D::extractFreeVoxels() const
 {
     std::vector<Eigen::Vector3d> free_voxels;
     std::for_each(grid_map.cbegin(),grid_map.cend(),[&](const auto& pair){
-        if (logOddsToProb(pair.second) < 0.7){free_voxels.emplace_back(voxelToPoint(pair.first));}});
+        if (logOddsToProb(pair.second) <= 0.3){free_voxels.emplace_back(voxelToPoint(pair.first));}});
     free_voxels.shrink_to_fit();
     return free_voxels;
 }
