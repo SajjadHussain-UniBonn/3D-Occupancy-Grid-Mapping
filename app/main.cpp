@@ -5,18 +5,17 @@
 #include <iostream>
 #include <iomanip>
 
-int main()
-{
+int main(){
+
     const std::string data_dir = "/home/sajjad/3D-Occupancy-Grid-Mapping/data";
     const dataloader::Dataset dataset = dataloader::Dataset(data_dir);
-    OccupancyGridMap3D map(0.5);
+    OccupancyGridMap3D map(1.0);
     double total_scan_time = 0;
     auto t0 = std::chrono::high_resolution_clock::now();
-    for (size_t i=0; i<dataset.size(); ++i)
-    {
+    for (size_t i=0; i< dataset.size(); ++i){
         auto [pose,cloud] = dataset[i];
         auto start =  std::chrono::high_resolution_clock::now();
-        map.integrateScan(pose,cloud);
+        map.IntegrateScan(pose,cloud);
         auto end = std::chrono::high_resolution_clock::now();
         total_scan_time += std::chrono::duration<double>(end - start).count();
 
@@ -26,7 +25,7 @@ int main()
     auto t1 = std::chrono::high_resolution_clock::now();
     std::cout << "\nAverage scan time: " << total_scan_time / dataset.size() << " s\n";
     std::cout << "Total execution time: " << std::chrono::duration<double>(t1 - t0).count() << " s\n";
-    visualize(map.extractOccupiedVoxels());
+    visualize(map.ExtractOccupiedVoxels());
 
     return 0;
 }
