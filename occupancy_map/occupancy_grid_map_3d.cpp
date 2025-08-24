@@ -34,10 +34,11 @@ std::vector<Eigen::Vector3i> OccupancyGridMap3D::Bresenham3D(const Eigen::Vector
             voxels.emplace_back(x,y,z);
             if (err_x > 0) {x += s.x(); err_x -= dy2;}
             if (err_z > 0) {z += s.z(); err_z -= dy2;}
+            err_x += dx2;
+            err_z += dz2;
+            y += s.y();
         }
-        err_x += dx2;
-        err_z += dz2;
-        y += s.y();
+        
     }
     else{
         int err_x = dx2 - dz;
@@ -46,10 +47,10 @@ std::vector<Eigen::Vector3i> OccupancyGridMap3D::Bresenham3D(const Eigen::Vector
             voxels.emplace_back(x,y,z);
             if (err_x > 0) {x += s.x(); err_x -= dz2;}
             if (err_y > 0) {y += s.y(); err_y -= dz2;}
-        }
-        err_x += dx2;
-        err_y += dy2;
-        z += s.z();
+            err_x += dx2;
+            err_y += dy2;
+            z += s.z();
+        }  
     }
     voxels.shrink_to_fit();
     return voxels;
