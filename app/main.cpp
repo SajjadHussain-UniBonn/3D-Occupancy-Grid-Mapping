@@ -13,7 +13,7 @@ int main(){
     double total_scan_time = 0;
     auto t0 = std::chrono::high_resolution_clock::now();
     for (size_t i=0; i< dataset.size(); ++i){
-        auto [pose,cloud] = dataset[i];
+        const auto& [pose,cloud] = dataset[i];
         auto start =  std::chrono::high_resolution_clock::now();
         map.IntegrateScan(pose,cloud);
         auto end = std::chrono::high_resolution_clock::now();

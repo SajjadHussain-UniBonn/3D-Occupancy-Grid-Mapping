@@ -9,13 +9,14 @@ Eigen::Vector3i OccupancyGridMap3D::PointToVoxel(const Eigen::Vector3d& point) c
 }
 std::vector<Eigen::Vector3i> OccupancyGridMap3D::Bresenham3D(const Eigen::Vector3i& start, const Eigen::Vector3i& end) const{
     std::vector<Eigen::Vector3i> voxels;
-    Eigen::Vector3i p = start;
-    Eigen::Vector3i d = (end-start).cwiseAbs();
-    Eigen::Vector3i s = (end-start).cwiseSign();
-    int dx = d.x(), dy = d.y(), dz = d.z();
+    const Eigen::Vector3i p = start;
+    const Eigen::Vector3i d = (end-start).cwiseAbs();
+    const Eigen::Vector3i s = (end-start).cwiseSign();
+    const int dx = d.x(), dy = d.y(), dz = d.z();
     int x = p.x(), y = p.y(), z = p.z();
-    int dx2 = 2*dx , dy2 = 2*dy, dz2 = 2*dz;
+    const int dx2 = 2*dx , dy2 = 2*dy, dz2 = 2*dz;
     if (dx >= dy && dx >= dz){
+        voxels.reserve(dx);
         int err_y = dy2 - dx;
         int err_z = dz2 - dx;
         for(int i =0; i<= dx; ++i){
@@ -28,6 +29,7 @@ std::vector<Eigen::Vector3i> OccupancyGridMap3D::Bresenham3D(const Eigen::Vector
         }
     }
     else if (dy >= dx && dy >= dz){ 
+        voxels.reserve(dy);;
         int err_x = dx2 - dy;
         int err_z = dz2 - dy;
         for (int i = 0; i<=dy; ++i){
@@ -41,6 +43,7 @@ std::vector<Eigen::Vector3i> OccupancyGridMap3D::Bresenham3D(const Eigen::Vector
         
     }
     else{
+        voxels.reserve(dz);;
         int err_x = dx2 - dz;
         int err_y = dy2 - dz;
         for (int i = 0; i<=dz; ++i){
@@ -52,30 +55,27 @@ std::vector<Eigen::Vector3i> OccupancyGridMap3D::Bresenham3D(const Eigen::Vector
             z += s.z();
         }  
     }
-    voxels.shrink_to_fit();
     return voxels;
 }
 void OccupancyGridMap3D::UpdateVoxelState (const Eigen::Vector3i& voxel,const double voxel_curr_log_odd,const double inv_sensor_model_log_odd){
     grid_map[voxel] = voxel_curr_log_odd + inv_sensor_model_log_odd - l0;
 }
 void OccupancyGridMap3D::IntegrateScan(const Eigen::Matrix4d& T, const std::vector<Eigen::Vector3d>& points){
-    Eigen::Vector3d robot_pos = T.block<3, 1>(0, 3);
-    auto start_voxel = PointToVoxel(robot_pos);
+    const Eigen::Vector3d robot_pos = T.block<3, 1>(0, 3);
+    const auto start_voxel = PointToVoxel(robot_pos);
     std::for_each(points.cbegin(),points.cend(),[&](const Eigen::Vector3d& p){
-        Eigen::Vector4d ph(p.x(), p.y(), p.z(), 1.0);
-        Eigen::Vector3d map_point = (T * ph).head<3>();
-        auto end_voxel   = PointToVoxel(map_point);
+        const Eigen::Vector4d ph(p.x(), p.y(), p.z(), 1.0);
+        const Eigen::Vector3d map_point = (T * ph).head<3>();
+        const auto end_voxel   = PointToVoxel(map_point);
         if (grid_map.find(start_voxel) != grid_map.end() && grid_map.find(end_voxel) != grid_map.end()){
             return;
         }
         auto ray = Bresenham3D(start_voxel, end_voxel);
         if (!ray.empty()){
             std::for_each(ray.cbegin(), std::prev(ray.cend()),[&](const auto& voxel){
-                auto voxel_log_odd = GetVoxelLogOdds(voxel);
-                UpdateVoxelState(voxel, voxel_log_odd, l_free);
+                UpdateVoxelState(voxel, GetVoxelLogOdds(voxel), l_free);
             });
-            auto last_voxel = ray.back();
-            UpdateVoxelState(last_voxel, GetVoxelLogOdds(last_voxel), l_occ);
+            UpdateVoxelState(ray.back(), GetVoxelLogOdds(ray.back()), l_occ);
         }
     });
 }
