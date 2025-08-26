@@ -70,7 +70,7 @@ void OccupancyGridMap3D::IntegrateScan(const Eigen::Matrix4d& T, const std::vect
         if (grid_map.find(start_voxel) != grid_map.end() && grid_map.find(end_voxel) != grid_map.end()){
             return;
         }
-        auto ray = Bresenham3D(start_voxel, end_voxel);
+        const auto& ray = Bresenham3D(start_voxel, end_voxel);
         if (!ray.empty()){
             std::for_each(ray.cbegin(), std::prev(ray.cend()),[&](const auto& voxel){
                 UpdateVoxelState(voxel, GetVoxelLogOdds(voxel), l_free);
